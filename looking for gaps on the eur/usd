@@ -1,0 +1,39 @@
+from datetime import datetime
+import MetaTrader5 as mt5
+import pandas as pd
+import pytz
+import numpy as np
+# подключение к терминалу
+if not mt5.initialize():
+    print("initialize() failed, error code =", mt5.last_error())
+    quit()
+
+# установка таймзоны в UTC
+timezone = pytz.timezone("Etc/UTC")
+utc_from = datetime(2021, 3, 31, tzinfo=timezone)
+# все значения баров с 1971 года
+rates = mt5.copy_rates_from("EURUSD", mt5.TIMEFRAME_H1, utc_from, 99999)
+
+# закрытие МТ
+mt5.shutdown()
+
+# получение данных из DataFrame
+rates_frame = pd.DataFrame(rates)
+rates_frame['time'] = pd.to_datetime(rates_frame['time'], unit='s')
+# print("датафрейм с данными")
+print(rates_frame)
+
+np_rates_frame = rates_frame.to_numpy()
+i=0
+j = i+1
+
+def find_gap():
+    count_gaps = 0
+    gap = np_rates_frame[i,4]-np_rates_frame[j,1]
+    if gap <= -0.0001 or gap >=-0.0001:
+        print(gap)
+
+
+while i < len(np_rates_frame[1:]) - 1:
+    find_gap()
+    i+=1
